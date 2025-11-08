@@ -1,25 +1,33 @@
-import { API_URL } from '/main.js';
+import { API_URL } from '../config.js';
 
 export async function Detalhes(container, id) {
   container.innerHTML = '<p>Carregando detalhes...</p>';
-  
+
   try {
     const res = await fetch(`${API_URL}/filmes/${id}`);
+    if (!res.ok) throw new Error('Filme não encontrado');
     const filme = await res.json();
 
     container.innerHTML = `
       <div class="detalhes">
-        <img src="${filme.imagem}" alt="${filme.titulo}">
+        <img 
+          src="${filme.imagem}" 
+          alt="${filme.titulo}" 
+          style="max-width:300px;border-radius:8px;display:block;margin:0 auto;"
+        >
         <h2>${filme.titulo}</h2>
         <p><b>Ano:</b> ${filme.ano}</p>
         <p><b>Diretor:</b> ${filme.diretor}</p>
         <p><b>Gênero:</b> ${filme.genero}</p>
-        <button onclick="window.location.hash='#editar/${filme.id}'">Editar</button>
-        <button onclick="removerFilme(${filme.id})">Excluir</button>
+
+        <div style="margin-top:1rem;">
+          <button onclick="window.location.hash='#editar/${filme.id}'">Editar</button>
+          <button onclick="removerFilme(${filme.id})">Excluir</button>
+        </div>
       </div>
     `;
-
   } catch (err) {
+    console.error(err);
     container.innerHTML = '<p>Erro ao carregar o filme.</p>';
   }
 }

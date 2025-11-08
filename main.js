@@ -10,7 +10,7 @@ document.querySelector('#footer').innerHTML = Footer();
 
 function router() {
   const hash = window.location.hash || '#home';
-  const [_, route, id] = hash.split('/');
+  const [_, route, id] = hash.split('/'); // divide o hash em partes
 
   switch (route) {
     case 'home':
