@@ -1,4 +1,4 @@
-import { API_URL } from '../config.js';
+import { API_URL } from '../main.js';
 
 export async function Detalhes(container, id) {
   container.innerHTML = '<p>Carregando detalhes...</p>';
