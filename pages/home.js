@@ -13,4 +13,6 @@ export async function Home(container) {
     container.innerHTML = '<p>Erro ao carregar filmes 😢</p>';
     console.error(err);
   }
+
+  console.log('Filmes carregados:', filmes);
 }
