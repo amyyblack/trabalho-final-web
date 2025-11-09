@@ -1,43 +1,64 @@
-import { API_URL } from '../main.js';
+// pages/detalhes.js
+import { API_URL, navegarPara } from "../main.js";
+import { renderForm } from "./form.js";
 
-export async function Detalhes(container, id) {
-  container.innerHTML = '<p>Carregando detalhes...</p>';
+export async function renderDetalhes(id) {
+  const conteudo = document.getElementById("conteudo");
+  conteudo.innerHTML = `<p class="loading">Carregando detalhes...</p>`;
 
   try {
-    const res = await fetch(`${API_URL}/filmes/${id}`);
-    if (!res.ok) throw new Error('Filme não encontrado');
-    const filme = await res.json();
+    const resposta = await fetch(`${API_URL}/filmes/${id}`);
+    if (!resposta.ok) throw new Error("Filme não encontrado");
+    const filme = await resposta.json();
 
-    container.innerHTML = `
-      <div class="detalhes">
-        <img 
-          src="${filme.imagem_url}" 
-          alt="${filme.titulo}"
-          onerror="this.src='https://via.placeholder.com/300x450?text=Sem+Imagem'"
-          style="max-width:300px;border-radius:8px;display:block;margin:0 auto;"
-        >
+    const imagemValida = filme.imagem_url?.startsWith("http")
+      ? filme.imagem_url
+      : "https://via.placeholder.com/500x700?text=Sem+Imagem";
+
+    conteudo.innerHTML = `
+      <button id="voltar">← Voltar</button>
+
+      <div class="detalhes-filme">
+        <img src="${imagemValida}" alt="${filme.titulo}">
         <h2>${filme.titulo}</h2>
-        <p><b>Ano:</b> ${filme.ano}</p>
-        <p><b>Diretor:</b> ${filme.diretor}</p>
-        <p><b>Gênero:</b> ${filme.genero}</p>
-        <p><b>Avaliação:</b> ⭐ ${filme.avaliacao}</p>
-        <p style="margin-top:1rem;">${filme.sinopse}</p>
+        <p><strong>Diretor:</strong> ${filme.diretor}</p>
+        <p><strong>Gênero:</strong> ${filme.genero}</p>
+        <p><strong>Ano:</strong> ${filme.ano}</p>
+        <p><strong>Sinopse:</strong> ${filme.sinopse}</p>
 
-        <div style="margin-top:1.5rem;">
-          <button onclick="window.location.hash='#editar/${filme.id}'">Editar</button>
-          <button onclick="removerFilme(${filme.id})">Excluir</button>
+        <div style="display:flex; gap:10px; margin-top:20px;">
+          <button id="editar">✏️ Editar</button>
+          <button id="excluir" class="danger">🗑 Excluir</button>
         </div>
       </div>
     `;
-  } catch (err) {
-    console.error(err);
-    container.innerHTML = '<p>Erro ao carregar o filme.</p>';
+
+    // === Botão VOLTAR ===
+    document.getElementById("voltar").addEventListener("click", () => {
+      navegarPara("home");
+    });
+
+    // === Botão EDITAR ===
+    document.getElementById("editar").addEventListener("click", () => {
+      renderForm(filme); // abre o mesmo form, com dados preenchidos
+    });
+
+    // === Botão EXCLUIR ===
+    document.getElementById("excluir").addEventListener("click", async () => {
+      const confirmar = confirm(`Tem certeza que deseja excluir "${filme.titulo}"?`);
+      if (!confirmar) return;
+
+      try {
+        await fetch(`${API_URL}/filmes/${id}`, { method: "DELETE" });
+        alert("Filme excluído com sucesso!");
+        navegarPara("home");
+      } catch (erro) {
+        console.error("Erro ao excluir:", erro);
+        alert("Erro ao excluir o filme.");
+      }
+    });
+  } catch (erro) {
+    console.error("Erro ao carregar detalhes:", erro);
+    conteudo.innerHTML = `<p style="color:red;text-align:center;">Erro ao carregar detalhes 😢</p>`;
   }
 }
-
-window.removerFilme = async (id) => {
-  if (confirm('Deseja mesmo excluir este filme?')) {
-    await fetch(`${API_URL}/filmes/${id}`, { method: 'DELETE' });
-    window.location.hash = '#home';
-  }
-};

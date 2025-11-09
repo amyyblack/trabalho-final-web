@@ -1,35 +1,26 @@
-import { Home } from './pages/home.js';
-import { Detalhes } from './pages/detalhes.js';
-import { FormFilme } from './pages/form.js';
-import { Header } from './components/header.js';
-import { Footer } from './components/footer.js';
+import { renderHeader } from "./components/header.js";
+import { renderFooter } from "./components/footer.js";
+import { renderHome } from "./pages/home.js";
+import { renderDetalhes } from "./pages/detalhes.js";
+import { renderForm } from "./pages/form.js";
 
-const app = document.querySelector('#app');
-document.querySelector('#header').innerHTML = Header();
-document.querySelector('#footer').innerHTML = Footer();
+export const API_URL = "https://back-end-tf-web-kqse.onrender.com";
 
-function router() {
-  const hash = window.location.hash || '#home';
-  const [_, route, id] = hash.split('/'); // divide o hash em partes
+export function navegarPara(pagina, id = null) {
+  const conteudo = document.getElementById("conteudo");
+  conteudo.innerHTML = "";
 
-  switch (route) {
-    case 'home':
-    default:
-      Home(app);
-      break;
-    case 'detalhes':
-      Detalhes(app, id);
-      break;
-    case 'novo':
-      FormFilme(app);
-      break;
-    case 'editar':
-      FormFilme(app, id);
-      break;
+  if (pagina === "home") {
+    renderHome();
+  } else if (pagina === "detalhes" && id) {
+    renderDetalhes(id);
+  } else if (pagina === "form") {
+    renderForm(id);
   }
 }
 
-window.addEventListener('hashchange', router);
-window.addEventListener('load', router);
-
-export const API_URL = 'https://back-end-tf-web-kqse.onrender.com';
+document.addEventListener("DOMContentLoaded", () => {
+  renderHeader();
+  renderFooter();
+  navegarPara("home");
+});
