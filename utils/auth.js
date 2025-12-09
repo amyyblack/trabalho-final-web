@@ -1,12 +1,12 @@
 export async function pedirCredenciais() {
-  return new Promise((resolve) => {
-    const senha = prompt("Digite a senha de administrador:");
+  const senha = prompt("Digite a senha de administrador:");
 
-    if (!senha) return resolve(null);
+  // Cancelar (clicou em cancelar) → retorna null
+  if (senha === null) return null;
 
-    resolve({
-      adminId: "admin",       // <- pode trocar
-      adminPass: senha
-    });
-  });
+  // Se digitou só espaços, também considera vazio
+  const limpa = senha.trim();
+  if (!limpa) return null;
+
+  return { adminId: "admin", adminPass: limpa };
 }

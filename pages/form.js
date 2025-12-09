@@ -30,12 +30,12 @@ export function renderForm(filme = null) {
     e.preventDefault();
 
     const novoFilme = {
-      titulo: titulo.value,
-      diretor: diretor.value,
-      genero: genero.value,
+      titulo: titulo.value.trim(),
+      diretor: diretor.value.trim(),
+      genero: genero.value.trim(),
       ano: parseInt(ano.value),
-      sinopse: sinopse.value,
-      imagem_url: imagem_url.value
+      sinopse: sinopse.value.trim(),
+      imagem_url: imagem_url.value.trim()
     };
 
     try {
@@ -45,7 +45,7 @@ export function renderForm(filme = null) {
 
       const metodo = filme ? "PUT" : "POST";
 
-      // === AUTENTICAÇÃO ===
+      // ===== AUTENTICAÇÃO =====
       const cred = await pedirCredenciais();
       if (!cred) {
         alert("Operação cancelada.");
@@ -63,7 +63,7 @@ export function renderForm(filme = null) {
       });
 
       if (!resposta.ok) {
-        const erro = await resposta.json();
+        const erro = await resposta.json().catch(() => ({ erro: "Erro desconhecido" }));
         alert("Erro: " + erro.erro);
         return;
       }
