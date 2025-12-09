@@ -1,64 +1,72 @@
-// pages/detalhes.js
-import { API_URL, navegarPara } from "../main.js";
+import { navegarPara } from "../main.js";
+import { pedirCredenciais } from "../utils/auth.js";
 import { renderForm } from "./form.js";
 
 export async function renderDetalhes(id) {
   const conteudo = document.getElementById("conteudo");
-  conteudo.innerHTML = `<p class="loading">Carregando detalhes...</p>`;
+  conteudo.innerHTML = `<p class="loading">Carregando...</p>`;
 
   try {
-    const resposta = await fetch(`${API_URL}/filmes/${id}`);
-    if (!resposta.ok) throw new Error("Filme não encontrado");
+    const resposta = await fetch(`https://back-end-tf-web-kqse.onrender.com/filmes/${id}`);
     const filme = await resposta.json();
-
-    const imagemValida = filme.imagem_url?.startsWith("http")
-      ? filme.imagem_url
-      : "https://via.placeholder.com/500x700?text=Sem+Imagem";
 
     conteudo.innerHTML = `
       <button id="voltar">← Voltar</button>
 
       <div class="detalhes-filme">
-        <img src="${imagemValida}" alt="${filme.titulo}">
+        <img src="${filme.imagem_url}" alt="${filme.titulo}">
         <h2>${filme.titulo}</h2>
+
         <p><strong>Diretor:</strong> ${filme.diretor}</p>
         <p><strong>Gênero:</strong> ${filme.genero}</p>
         <p><strong>Ano:</strong> ${filme.ano}</p>
-        <p><strong>Sinopse:</strong> ${filme.sinopse}</p>
 
-        <div style="display:flex; gap:10px; margin-top:20px;">
-          <button id="editar">✏️ Editar</button>
-          <button id="excluir" class="danger">🗑 Excluir</button>
+        <p>${filme.sinopse}</p>
+
+        <div style="margin-top:20px; display:flex; gap:10px;">
+          <button id="editar">Editar</button>
+          <button id="deletar" class="danger">Excluir</button>
         </div>
       </div>
     `;
 
-    // === Botão VOLTAR ===
-    document.getElementById("voltar").addEventListener("click", () => {
-      navegarPara("home");
-    });
+    document.getElementById("voltar").onclick = () => navegarPara("home");
 
-    // === Botão EDITAR ===
-    document.getElementById("editar").addEventListener("click", () => {
-      renderForm(filme); // abre o mesmo form, com dados preenchidos
-    });
+    // EDITAR
+    document.getElementById("editar").onclick = () => {
+      renderForm(filme);
+    };
 
-    // === Botão EXCLUIR ===
-    document.getElementById("excluir").addEventListener("click", async () => {
-      const confirmar = confirm(`Tem certeza que deseja excluir "${filme.titulo}"?`);
-      if (!confirmar) return;
+    // EXCLUIR
+    document.getElementById("deletar").onclick = async () => {
+      if (!confirm("Tem certeza que deseja excluir?")) return;
 
-      try {
-        await fetch(`${API_URL}/filmes/${id}`, { method: "DELETE" });
-        alert("Filme excluído com sucesso!");
-        navegarPara("home");
-      } catch (erro) {
-        console.error("Erro ao excluir:", erro);
-        alert("Erro ao excluir o filme.");
+      // autenticação
+      const cred = await pedirCredenciais();
+      if (!cred) {
+        alert("Operação cancelada.");
+        return;
       }
-    });
-  } catch (erro) {
-    console.error("Erro ao carregar detalhes:", erro);
-    conteudo.innerHTML = `<p style="color:red;text-align:center;">Erro ao carregar detalhes 😢</p>`;
+
+      const resposta = await fetch(`https://back-end-tf-web-kqse.onrender.com/filmes/${id}`, {
+        method: "DELETE",
+        headers: {
+          "X-Admin-ID": cred.adminId,
+          "X-Admin-PASS": cred.adminPass
+        }
+      });
+
+      if (!resposta.ok) {
+        const err = await resposta.json();
+        alert("Erro: " + err.erro);
+        return;
+      }
+
+      alert("Filme excluído!");
+      navegarPara("home");
+    };
+
+  } catch (err) {
+    conteudo.innerHTML = `<p>Erro ao carregar detalhes.</p>`;
   }
 }

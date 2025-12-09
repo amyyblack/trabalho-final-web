@@ -210,3 +210,37 @@ button.danger:hover {
 #novo-filme:hover {
   background: #27ae60;
 }
+
+.auth-popup {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+.auth-box {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    width: 280px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.auth-box input {
+    width: 100%;
+    padding: 8px;
+}
+
+.auth-box .buttons {
+    display: flex;
+    justify-content: space-between;
+}
+
+.auth-box button {
+    padding: 6px 12px;
+}
